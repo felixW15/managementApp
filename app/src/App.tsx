@@ -1,45 +1,34 @@
+// src/App.tsx
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/Auth";
+import TaskList from "./components/TaskList";
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
 
-  // Load token from localStorage on startup
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setToken(storedToken);
-    }
+    if (storedToken) setToken(storedToken);
   }, []);
 
-  // Save token to localStorage when changed
   const handleLogin = (newToken: string) => {
     localStorage.setItem("token", newToken);
     setToken(newToken);
   };
 
-  const logout = () => {
+  const handleLogout = () => {
     localStorage.removeItem("token");
     setToken(null);
   };
 
   return (
-    <>
+    <div className="p-6 max-w-2xl mx-auto">
       {!token ? (
         <AuthPage onLogin={handleLogin} />
       ) : (
-        <div className="p-6">
-          <h1 className="text-xl mb-4">Logged in!</h1>
-          <p className="mb-2">JWT: {token.slice(0, 20)}...</p>
-          <button
-            className="bg-red-500 text-white px-4 py-2 rounded"
-            onClick={logout}
-          >
-            Logout
-          </button>
-        </div>
+        <TaskList token={token} onLogout={handleLogout} />
       )}
-    </>
+    </div>
   );
 }
 
