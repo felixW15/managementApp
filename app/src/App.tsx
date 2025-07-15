@@ -1,7 +1,8 @@
 // src/App.tsx
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/Auth";
-import TaskList from "./components/TaskList";
+import { Tasks } from "./components/TaskList";
+import { setOnUnauthorized } from "./api/tasks";
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
@@ -16,20 +17,40 @@ function App() {
     setToken(newToken);
   };
 
+  useEffect(() => {
+    if (token) {
+      setOnUnauthorized(() => {
+        console.warn("Token expired. Logging out.");
+        handleLogout();
+      });
+    }
+  }, [token]);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     setToken(null);
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-6 max-w-2xl mx-auto space-y-6">
       {!token ? (
         <AuthPage onLogin={handleLogin} />
       ) : (
-        <TaskList token={token} onLogout={handleLogout} />
+        <>
+          <div className="flex justify-end">
+            <button
+              onClick={handleLogout}
+              className="text-sm text-red-500 hover:underline"
+            >
+              Logout
+            </button>
+          </div>
+          <Tasks token={token} />
+        </>
       )}
     </div>
   );
 }
 
 export default App;
+
