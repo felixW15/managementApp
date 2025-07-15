@@ -15,3 +15,7 @@ class Task(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     priority_score: Optional[int] = 0
     user_id: Optional[int] = None  # Will be used when auth is ready
+
+class TaskBase(SQLModel):
+    title: str
+    description: Optional[str] = None

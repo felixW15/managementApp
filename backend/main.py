@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 
 from auth import hash_password, verify_password, create_access_token, decode_access_token
-from models import User, Task  # <-- assuming Task is moved here too
+from models import User, Task ,TaskBase # <-- assuming Task is moved here too
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, Request
 from sqlmodel import select
@@ -40,6 +40,13 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 engine = create_engine(sqlite_url, echo=True)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+def init_db():
+    SQLModel.metadata.create_all(engine)
 
 # Create DB tables
 @app.on_event("startup")
@@ -87,3 +94,31 @@ def get_tasks(current_user: User = Depends(get_current_user)):
         statement = select(Task).where(Task.user_id == current_user.id)
         tasks = session.exec(statement).all()
         return tasks
+    
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    task = session.get(Task, task_id)
+    if not task or task.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    session.delete(task)
+    session.commit()
+    return {"ok": True}
+
+@app.put("/tasks/{task_id}", response_model=Task)
+def update_task(
+    task_id: int,
+    updated_task: TaskBase,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    task = session.get(Task, task_id)
+    if not task or task.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    task.title = updated_task.title
+    task.description = updated_task.description
+    session.add(task)
+    session.commit()
+    session.refresh(task)
+    return task
