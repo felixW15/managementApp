@@ -113,7 +113,7 @@ def update_task(
     session: Session = Depends(get_session),
 ):
     task = session.get(Task, task_id)
-    if not task or task.owner_id != current_user.id:
+    if not task or task.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Task not found")
 
     task.title = updated_task.title

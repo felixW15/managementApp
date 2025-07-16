@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { getTasks, addTask, deleteTask, updateTask } from '../api/tasks';
 import type{ Task } from '../api/tasks';
 import { TaskItem } from './TaskItem';
+import { useMergeSort } from "../hooks/useMergeSort";
+import { SortUI } from "./SortUI";
 
 interface TasksProps {
   token: string;
@@ -12,6 +14,21 @@ interface TasksProps {
 export function Tasks({ token }: TasksProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTitle, setNewTitle] = useState('');
+  const [sorting, setSorting] = useState(false);
+
+  const { currentPair, sorted, start, choose } = useMergeSort(tasks);
+
+  const handleSort = () => {
+    setSorting(true);
+    start();
+  };
+
+useEffect(() => {
+  if (sorted && sorting) {
+    setTasks(sorted);
+    setSorting(false);
+  }
+}, [sorted, sorting]);
 
   useEffect(() => {
     getTasks(token).then(setTasks).catch(console.error);
@@ -67,6 +84,16 @@ export function Tasks({ token }: TasksProps) {
             onEdit={handleEdit}
           />
         ))
+      )}
+            <button
+        onClick={handleSort}
+        className="mt-6 bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700"
+      >
+        Sort Tasks
+      </button>
+
+      {currentPair && currentPair[0] && currentPair[1] && (
+        <SortUI taskA={currentPair[0]} taskB={currentPair[1]} onChoose={choose} />
       )}
     </div>
   );

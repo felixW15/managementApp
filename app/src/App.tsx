@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import AuthPage from "./pages/Auth";
 import { Tasks } from "./components/TaskList";
 import { setOnUnauthorized } from "./api/tasks";
+import { SidebarLayout } from "./components/SidebarLayout";
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
@@ -32,21 +33,13 @@ function App() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
+    <div className="mx-auto">
       {!token ? (
         <AuthPage onLogin={handleLogin} />
       ) : (
-        <>
-          <div className="flex justify-end">
-            <button
-              onClick={handleLogout}
-              className="text-sm text-red-500 hover:underline"
-            >
-              Logout
-            </button>
-          </div>
+        <SidebarLayout onLogout={handleLogout}>
           <Tasks token={token} />
-        </>
+        </SidebarLayout>
       )}
     </div>
   );
