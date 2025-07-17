@@ -1,11 +1,11 @@
 // src/components/SortUI.tsx
 import type{ Task } from "../api/tasks";
 
-interface SortUIProps {
+type SortUIProps = {
   taskA: Task;
   taskB: Task;
-  onChoose: (chosen: Task) => void;
-}
+  onChoose: (task: Task) => void;
+};
 
 export function SortUI({ taskA, taskB, onChoose }: SortUIProps) {
   return (
@@ -21,9 +21,6 @@ export function SortUI({ taskA, taskB, onChoose }: SortUIProps) {
             >
               <h3 className="font-bold text-lg">{task.title}</h3>
               <p className="text-sm text-gray-600">{task.description}</p>
-              <p className="text-xs text-gray-500 mt-2">
-                Created: {new Date(task.created_at).toLocaleDateString()}
-              </p>
             </button>
           ))}
         </div>

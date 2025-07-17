@@ -1,100 +1,82 @@
-import type{ Task } from "../api/tasks";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import type { Task } from "../api/tasks";
+
+type CompareRequest = {
+  leftIndex: number;
+  rightIndex: number;
+  resolve: (winnerIndex: number) => void;
+};
 
 export function useMergeSort(tasks: Task[]) {
-  const [sorted, setSorted] = useState<Task[] | null>(null);
-  const [currentPair, setCurrentPair] = useState<[Task, Task] | null>(null);
-  const [stack, setStack] = useState<any[]>([]);
+  const [sortedIndexes, setSortedIndexes] = useState<number[] | null>(null);
+  const [compareRequest, setCompareRequest] = useState<CompareRequest | null>(null);
 
-  const start = () => {
-    const s = createMergeStack(tasks);
-    console.log("merge stack", s);
-    setStack(s);
-    showNextComparison(s);
-  };
+  const sort = useCallback(async () => {
+    const indexes = tasks.map((_, i) => i); // [0, 1, 2, ...]
+    const result = await mergeSort(indexes);
+    setSortedIndexes(result);
+  }, [tasks]);
 
-  const choose = (preferred: Task) => {
-    const top = stack[stack.length - 1];
-    let { left, right, result, i, j } = top;
+  async function mergeSort(indexes: number[]): Promise<number[]> {
+    if (indexes.length <= 1) return indexes;
 
-    if (preferred.id === left[i].id) {
-      result.push(left[i++]);
-    } else {
-      result.push(right[j++]);
-    }
+    const mid = Math.floor(indexes.length / 2);
+    const left = await mergeSort(indexes.slice(0, mid));
+    const right = await mergeSort(indexes.slice(mid));
 
-    if (i < left.length && j < right.length) {
-      updateTop({ i, j, result });
-      setCurrentPair([left[i], right[j]]);
-    } else {
-      result.push(...left.slice(i), ...right.slice(j));
-      stack.pop();
+    return await merge(left, right);
+  }
 
-      if (stack.length === 0) {
-        setSorted(result);
-        setCurrentPair(null);
+  async function merge(left: number[], right: number[]): Promise<number[]> {
+    const result: number[] = [];
+    let indexL = 0;
+    let indexR = 0;
+
+    while (indexL < left.length && indexR < right.length) {
+      const leftIndex = left[indexL];
+      const rightIndex = right[indexR];
+
+      const winnerIndex = await new Promise<number>((resolve) => {
+        setCompareRequest({ leftIndex, rightIndex, resolve });
+      });
+
+      if (winnerIndex === leftIndex) {
+        result.push(leftIndex);
+        indexL++;
       } else {
-        const parent = stack[stack.length - 1];
-        if (!parent.subResults) parent.subResults = [];
-        parent.subResults.push(result);
-        showNextComparison(stack);
+        result.push(rightIndex);
+        indexR++;
       }
     }
-  };
 
-  const showNextComparison = (s: any[]) => {
-    let top = s[s.length - 1];
-    console.log("top before pairing:", top);
-    console.log(top.subResults)
-    while (top.subResults?.length === 2) {
-      const [left, right] = top.subResults;
-      top.left = left;
-      top.right = right;
-      top.i = 0;
-      top.j = 0;
-      top.result = [];
-      top.subResults = undefined;
-      top = s[s.length - 1];
+    while (indexL < left.length) {
+      result.push(left[indexL]);
+      indexL++;
     }
 
-    if (top.left && top.right) {
-        console.log("Setting currentPair to:", [top.left[top.i], top.right[top.j]]);
-      setCurrentPair([top.left[top.i], top.right[top.j]]);
+    while (indexR < right.length) {
+      result.push(right[indexR]);
+      indexR++;
     }
-  };
+    console.log(result);
+    return result;
+  }
 
-  const updateTop = (updates: any) => {
-    const updated = { ...stack[stack.length - 1], ...updates };
-    const newStack = [...stack.slice(0, -1), updated];
-    setStack(newStack);
+  const choose = (winnerIndex: number) => {
+    if (compareRequest) {
+      compareRequest.resolve(winnerIndex);
+      setCompareRequest(null);
+    }
   };
 
   return {
-    currentPair,
-    sorted,
-    start,
+    tasks,
+    sortedTasks: sortedIndexes ? sortedIndexes.map((i) => tasks[i]) : null,
+    currentComparison:
+      compareRequest !== null
+        ? [tasks[compareRequest.leftIndex], tasks[compareRequest.rightIndex]]
+        : null,
+    sort,
     choose,
   };
-}
-
-function createMergeStack(arr: Task[]) {
-  const stack: any[] = [];
-
-  const divide = (list: Task[]): any => {
-    if (list.length <= 1) return list;
-
-    const mid = Math.floor(list.length / 2);
-    const left = divide(list.slice(0, mid));
-    const right = divide(list.slice(mid));
-
-    const mergeStep = {
-      subResults: [left, right],
-    };
-
-    stack.push(mergeStep);
-    return mergeStep;
-  };
-
-  divide(arr);
-  return stack;
 }

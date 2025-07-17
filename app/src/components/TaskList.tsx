@@ -14,21 +14,10 @@ interface TasksProps {
 export function Tasks({ token }: TasksProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTitle, setNewTitle] = useState('');
-  const [sorting, setSorting] = useState(false);
 
-  const { currentPair, sorted, start, choose } = useMergeSort(tasks);
+  const { sortedTasks, currentComparison, sort, choose} = useMergeSort(tasks);
 
-  const handleSort = () => {
-    setSorting(true);
-    start();
-  };
-
-useEffect(() => {
-  if (sorted && sorting) {
-    setTasks(sorted);
-    setSorting(false);
-  }
-}, [sorted, sorting]);
+  const isSorting = currentComparison !== null;
 
   useEffect(() => {
     getTasks(token).then(setTasks).catch(console.error);
@@ -85,15 +74,25 @@ useEffect(() => {
           />
         ))
       )}
-            <button
-        onClick={handleSort}
+      <button
+        onClick={sort}
         className="mt-6 bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700"
       >
         Sort Tasks
       </button>
 
-      {currentPair && currentPair[0] && currentPair[1] && (
-        <SortUI taskA={currentPair[0]} taskB={currentPair[1]} onChoose={choose} />
+      {currentComparison && (
+        <SortUI taskA={currentComparison[0]} taskB={currentComparison[1]}  onChoose={(task) => choose(task.id === currentComparison[0].id ? tasks.indexOf(currentComparison[0]) : tasks.indexOf(currentComparison[1]))} />
+      )}
+
+      {!isSorting && sortedTasks && (
+      <ul className="mt-4">
+        {sortedTasks.map((task) => (
+          <li key={task.id} className="border p-2 my-1 rounded">
+            {task.title}
+          </li>
+        ))}
+      </ul>
       )}
     </div>
   );
