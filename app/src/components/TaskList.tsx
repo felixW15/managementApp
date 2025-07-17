@@ -86,13 +86,27 @@ export function Tasks({ token }: TasksProps) {
       )}
 
       {!isSorting && sortedTasks && (
-      <ul className="mt-4">
-        {sortedTasks.map((task) => (
-          <li key={task.id} className="border p-2 my-1 rounded">
-            {task.title}
-          </li>
-        ))}
-      </ul>
+          <div className="mt-6">
+            <h2 className="text-2xl font-bold mb-4">📋 Sorted Tasks</h2>
+            <ul className="space-y-2">
+              {sortedTasks.map((task, index) => (
+                <li
+                  key={task.id}
+                  className="border p-3 rounded shadow flex items-center gap-3"
+                >
+                  <span className="text-gray-500 font-semibold w-6 text-right">
+                    {index + 1}.
+                  </span>
+                  <div>
+                    <h3 className="font-medium">{task.title}</h3>
+                    {task.description && (
+                      <p className="text-sm text-gray-600">{task.description}</p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
       )}
     </div>
   );

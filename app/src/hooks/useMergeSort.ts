@@ -58,7 +58,6 @@ export function useMergeSort(tasks: Task[]) {
       result.push(right[indexR]);
       indexR++;
     }
-    console.log(result);
     return result;
   }
 
