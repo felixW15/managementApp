@@ -6,6 +6,7 @@ import type{ Task } from '../api/tasks';
 import { TaskItem } from './TaskItem';
 import { useMergeSort } from "../hooks/useMergeSort";
 import { SortUI } from "./SortUI";
+import { SortedTaskList } from './sortedList';
 
 interface TasksProps {
   token: string;
@@ -85,29 +86,7 @@ export function Tasks({ token }: TasksProps) {
         <SortUI taskA={currentComparison[0]} taskB={currentComparison[1]}  onChoose={(task) => choose(task.id === currentComparison[0].id ? tasks.indexOf(currentComparison[0]) : tasks.indexOf(currentComparison[1]))} />
       )}
 
-      {!isSorting && sortedTasks && (
-          <div className="mt-6">
-            <h2 className="text-2xl font-bold mb-4">📋 Sorted Tasks</h2>
-            <ul className="space-y-2">
-              {sortedTasks.map((task, index) => (
-                <li
-                  key={task.id}
-                  className="border p-3 rounded shadow flex items-center gap-3"
-                >
-                  <span className="text-gray-500 font-semibold w-6 text-right">
-                    {index + 1}.
-                  </span>
-                  <div>
-                    <h3 className="font-medium">{task.title}</h3>
-                    {task.description && (
-                      <p className="text-sm text-gray-600">{task.description}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-      )}
+      {!isSorting && sortedTasks && <SortedTaskList tasks={sortedTasks} />}
     </div>
   );
 }
