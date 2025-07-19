@@ -6,8 +6,9 @@ from fastapi import HTTPException
 
 
 from auth import hash_password, verify_password, create_access_token, decode_access_token
-from models import User, Task ,TaskBase # <-- assuming Task is moved here too
+from models import User, Task ,TaskBase ,Media, MediaBase # <-- assuming Task is moved here too
 from fastapi.security import OAuth2PasswordBearer
+from datetime import datetime
 from fastapi import Depends, Request
 from sqlmodel import select
 
@@ -122,3 +123,54 @@ def update_task(
     session.commit()
     session.refresh(task)
     return task
+
+@app.post("/media/")
+def create_media(media: MediaBase, current_user: User = Depends(get_current_user)):
+    with Session(engine) as session:
+        new_media = Media(**media.dict(), user_id=current_user.id, last_edited=datetime.now())
+        session.add(new_media)
+        session.commit()
+        session.refresh(new_media)
+        return new_media
+
+@app.get("/media/")
+def get_media(current_user: User = Depends(get_current_user)):
+    with Session(engine) as session:
+        statement = select(Media).where(Media.user_id == current_user.id)
+        media_list = session.exec(statement).all()
+        return media_list
+
+@app.delete("/media/{media_id}")
+def delete_media(media_id: int, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    media = session.get(Media, media_id)
+    if not media or media.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Media item not found")
+    session.delete(media)
+    session.commit()
+    return {"ok": True}
+
+@app.put("/media/{media_id}", response_model=Media)
+def update_media(
+    media_id: int,
+    updated: MediaBase,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    media = session.get(Media, media_id)
+    if not media or media.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Media item not found")
+
+   # Check if progress has changed
+    if updated.progress != media.progress:
+        media.last_edited = datetime.now()
+
+    # Update all fields from the incoming model
+    media.name = updated.name
+    media.category = updated.category
+    media.status = updated.status
+    media.progress = updated.progress
+
+    session.add(media)
+    session.commit()
+    session.refresh(media)
+    return media
