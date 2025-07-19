@@ -4,6 +4,7 @@ import AuthPage from "./pages/Auth";
 import { Tasks } from "./components/TaskList";
 import { setOnUnauthorized } from "./api/tasks";
 import { SidebarLayout } from "./components/SidebarLayout";
+import { MediaComponent } from "./components/MediaManager";
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
@@ -37,9 +38,21 @@ function App() {
       {!token ? (
         <AuthPage onLogin={handleLogin} />
       ) : (
-        <SidebarLayout onLogout={handleLogout}>
-          <Tasks token={token} />
-        </SidebarLayout>
+        <SidebarLayout
+        onLogout={handleLogout}
+        menuItems={[
+          {
+            label: "Tasks",
+            key: "tasks",
+            component: <Tasks token={token} />,
+          },
+          {
+            label: "Media",
+            key: "media",
+            component: <MediaComponent token={token} />,
+          },
+        ]}
+      />
       )}
     </div>
   );

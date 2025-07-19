@@ -1,12 +1,23 @@
 // src/components/SidebarLayout.tsx
-import type{ ReactNode } from "react";
+import { useState } from "react";
+import type { ReactNode } from "react";
+
+type MenuItem = {
+  label: string;
+  key: string;
+  component: ReactNode;
+};
 
 interface SidebarLayoutProps {
-  children: ReactNode;
   onLogout: () => void;
+  menuItems: MenuItem[];
 }
 
-export function SidebarLayout({ children, onLogout }: SidebarLayoutProps) {
+export function SidebarLayout({ onLogout, menuItems }: SidebarLayoutProps) {
+  const [activeKey, setActiveKey] = useState(menuItems[0]?.key);
+
+  const activeComponent = menuItems.find((item) => item.key === activeKey)?.component;
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -14,15 +25,22 @@ export function SidebarLayout({ children, onLogout }: SidebarLayoutProps) {
         <nav>
           <h2 className="text-xl font-bold mb-6">📋 MyApp</h2>
           <ul className="space-y-3">
-            <li>
-              <a
-                href="#"
-                className="text-gray-800 hover:text-blue-600 block font-medium"
-              >
-                Tasks
-              </a>
-            </li>
-            {/* Add more nav links here later */}
+            {menuItems.map((item) => (
+              <li key={item.key}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveKey(item.key);
+                  }}
+                  className={`block font-medium ${
+                    activeKey === item.key ? "text-blue-600" : "text-gray-800 hover:text-blue-600"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
         <button
@@ -34,7 +52,7 @@ export function SidebarLayout({ children, onLogout }: SidebarLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-6 bg-white">{children}</main>
+      <main className="flex-1 p-6 bg-white">{activeComponent}</main>
     </div>
   );
 }
