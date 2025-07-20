@@ -35,7 +35,7 @@ export function SortedTaskList({ tasks }: Props) {
 
   return (
     <div className="mt-6">
-      <h2 className="text-2xl font-bold mb-4">📋 Sorted Tasks</h2>
+      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">📋 Sorted Tasks</h2>
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
           items={sortedTasks.map((task) => task.id)}
@@ -66,15 +66,15 @@ function SortableTaskItem({ task, index }: { task: Task; index: number }) {
       {...attributes}
       {...listeners}
       style={style}
-      className="border p-3 rounded shadow flex items-center gap-3 cursor-move bg-white"
+      className="border border-gray-300 dark:border-gray-700 p-3 rounded shadow flex items-center gap-3 cursor-move bg-white dark:bg-gray-800"
     >
-      <span className="text-gray-500 font-semibold w-6 text-right">
+      <span className="text-gray-500 dark:text-gray-400 font-semibold w-6 text-right">
         {index + 1}.
       </span>
       <div>
-        <h3 className="font-medium">{task.title}</h3>
+        <h3 className="font-medium text-gray-900 dark:text-gray-100">{task.title}</h3>
         {task.description && (
-          <p className="text-sm text-gray-600">{task.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{task.description}</p>
         )}
       </div>
     </li>

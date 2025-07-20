@@ -41,3 +41,19 @@ export async function deleteMedia(id: number, token: string): Promise<void> {
     onUnauthorized: onUnauthorizedCallback,
   }, token);
 }
+
+export async function updateMedia(
+  id: number,
+  data: Partial<Omit<MediaBase, "user_id">>,
+  token: string
+): Promise<Media> {
+  return apiFetch<Media>(
+    `/media/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+      onUnauthorized: onUnauthorizedCallback,
+    },
+    token
+  );
+}
