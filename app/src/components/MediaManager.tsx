@@ -20,6 +20,9 @@ export function MediaComponent({ token }: MediaComponentProps) {
   const [tempEditData, setTempEditData] = useState<Record<number, MediaBase>>({});
   const [categoryFilter, setCategoryFilter] = useState<"all" | Media["category"]>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | Media["status"]>("in progress");
+  const [sortOption, setSortOption] = useState<"alphabetical" | "lastEdited" | "progress">("lastEdited");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const categoryColors: Record<Media["category"], string> = {
     book: "bg-yellow-100 text-yellow-800 border-yellow-300",
@@ -115,65 +118,100 @@ const handleInlineUpdate = async (
     }
   };
 
-  const filteredMediaList = mediaList.filter((media) => {
+const filteredMediaList = mediaList
+  .filter((media) => {
     const categoryMatch = categoryFilter === "all" || media.category === categoryFilter;
     const statusMatch = statusFilter === "all" || media.status === statusFilter;
-    return categoryMatch && statusMatch;
+    const nameMatch = media.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return categoryMatch && statusMatch && nameMatch;
+  })
+  .sort((a, b) => {
+    switch (sortOption) {
+      case "alphabetical":
+        return a.name.localeCompare(b.name);
+      case "lastEdited":
+        return new Date(b.last_edited).getTime() - new Date(a.last_edited).getTime();
+      case "progress":
+        return b.progress - a.progress;
+      default:
+        return 0;
+    }
   });
 
  return (
   <div className="max-w-2xl mx-auto">
     <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">📚 Media Manager</h2>
 
-    <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-      <input
-        name="name"
-        placeholder="Name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-        className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-      />
-
-      <select
-        name="category"
-        value={formData.category}
-        onChange={handleChange}
-        className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-      >
-        <option value="book">Book</option>
-        <option value="manga">Manga</option>
-        <option value="anime">Anime</option>
-        <option value="visual novel">Visual Novel</option>
-      </select>
-
-      <select
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-        className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-      >
-        <option value="in progress">In Progress</option>
-        <option value="completed">Completed</option>
-        <option value="dropped">Dropped</option>
-      </select>
-
-      <input
-        name="progress"
-        type="number"
-        value={formData.progress}
-        onChange={handleChange}
-        className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        min={0}
-      />
-
+    <div className="mb-4">
       <button
-        type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        onClick={() => setShowAddForm((prev) => !prev)}
+        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
       >
-        Add Media
+        {showAddForm ? "Hide Add Form" : "➕ Add New Media"}
       </button>
-    </form>
+    </div>
+
+    <div
+      className={`transition-all overflow-hidden duration-300 ease-in-out ${
+        showAddForm ? "max-h-[1000px] opacity-100 scale-100" : "max-h-0 opacity-0 scale-95"
+      }`}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+        <input
+          name="name"
+          placeholder="Name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        />
+
+        <select
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        >
+          <option value="book">Book</option>
+          <option value="manga">Manga</option>
+          <option value="anime">Anime</option>
+          <option value="visual novel">Visual Novel</option>
+        </select>
+
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        >
+          <option value="in progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="dropped">Dropped</option>
+        </select>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+            Progress
+          </label>
+          <CustomNumberInput
+            value={formData.progress}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(newValue) =>
+              setFormData((prev) => ({ ...prev, progress: newValue }))
+            }
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Add Media
+        </button>
+      </form>
+    </div>
 
     <div className="flex gap-4 mb-4">
       <div>
@@ -208,6 +246,34 @@ const handleInlineUpdate = async (
           <option value="dropped">Dropped</option>
         </select>
       </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+          Sort By
+        </label>
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value as typeof sortOption)}
+          className="border border-gray-300 dark:border-gray-700 p-1 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        >
+          <option value="lastEdited">Last Edited</option>
+          <option value="alphabetical">Alphabetical</option>
+          <option value="progress">Progress</option>
+        </select>
+      </div>
+
+      <div className="flex-1">
+        <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+          Search
+        </label>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by name..."
+          className="w-full border border-gray-300 dark:border-gray-700 p-1 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        />
+      </div>
     </div>
 
     <ul className="space-y-2">
@@ -227,7 +293,18 @@ const handleInlineUpdate = async (
               </strong>
               <div className="flex gap-3 text-sm">
                 <button
-                  onClick={() => setEditingId(media.id)}
+                  onClick={() => {
+                    setEditingId(media.id);
+                    setTempEditData((prev) => ({
+                      ...prev,
+                      [media.id]: {
+                        name: media.name,
+                        category: media.category,
+                        status: media.status,
+                        progress: media.progress,
+                      },
+                    }));
+                  }}
                   className="text-blue-600 hover:underline"
                 >
                   Edit
@@ -242,6 +319,94 @@ const handleInlineUpdate = async (
             </div>
 
             {/* Media properties */}
+            {isEditing ? (
+              <div className="space-y-3">
+                <input
+                  value={temp.name}
+                  onChange={(e) =>
+                    setTempEditData((prev) => ({
+                      ...prev,
+                      [media.id]: { ...prev[media.id], name: e.target.value },
+                    }))
+                  }
+                  className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                />
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Category</label>
+                    <select
+                      value={temp.category}
+                      onChange={(e) =>
+                        setTempEditData((prev) => ({
+                          ...prev,
+                          [media.id]: { ...prev[media.id], category: e.target.value as Media["category"] },
+                        }))
+                      }
+                      className="border border-gray-300 dark:border-gray-700 px-2 py-1 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    >
+                      <option value="book">Book</option>
+                      <option value="manga">Manga</option>
+                      <option value="anime">Anime</option>
+                      <option value="visual novel">Visual Novel</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Status</label>
+                    <select
+                      value={temp.status}
+                      onChange={(e) =>
+                        setTempEditData((prev) => ({
+                          ...prev,
+                          [media.id]: { ...prev[media.id], status: e.target.value as Media["status"] },
+                        }))
+                      }
+                      className="border border-gray-300 dark:border-gray-700 px-2 py-1 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    >
+                      <option value="in progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                      <option value="dropped">Dropped</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Progress</label>
+                    <CustomNumberInput
+                      value={temp.progress}
+                      onChange={(newVal) =>
+                        setTempEditData((prev) => ({
+                          ...prev,
+                          [media.id]: { ...prev[media.id], progress: newVal },
+                        }))
+                      }
+                      min={0}
+                      max={100}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleEditSubmit(media.id, temp)}
+                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingId(null);
+                      setTempEditData((prev) => {
+                        const newData = { ...prev };
+                        delete newData[media.id];
+                        return newData;
+                      });
+                    }}
+                    className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
                 <span className="block text-gray-500 dark:text-gray-400 font-medium">Category</span>
@@ -282,6 +447,7 @@ const handleInlineUpdate = async (
                 </span>
               </div>
             </div>
+            )}
           </li>
         );
       })}
