@@ -5,3 +5,5 @@ sqlmodel
 sqlalchemy
 httpx
 passlib[bcrypt]
+python-jose[cryptography]
+python-dotenv
