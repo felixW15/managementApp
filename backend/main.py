@@ -11,6 +11,8 @@ from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime
 from fastapi import Depends, Request
 from sqlmodel import select
+import os
+
 
 
 app = FastAPI()
@@ -38,7 +40,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         return user
 
 # SQLite engine (can switch to Postgres later)
-sqlite_file_name = "database.db"
+sqlite_file_name = os.getenv("DATABASE_URL", "database.db")
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 engine = create_engine(sqlite_url, echo=True)
 
