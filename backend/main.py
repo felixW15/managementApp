@@ -61,6 +61,13 @@ def on_startup():
 def read_root():
     return {"message": "Hello from FastAPI 🚀"}
 
+@app.get("/me")
+def read_users_me(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username
+    }
+
 @app.post("/register")
 def register(username: str, password: str):
     with Session(engine) as session:

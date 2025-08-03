@@ -15,6 +15,15 @@ export function setOnUnauthorized(callback: () => void) {
   onUnauthorizedCallback = callback;
 }
 
+export async function validateToken(token: string): Promise<boolean> {
+  try {
+    await apiFetch("/me", { onUnauthorized: onUnauthorizedCallback }, token);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 export async function getTasks(token: string): Promise<Task[]> {
   return apiFetch<Task[]>("/tasks/", { onUnauthorized: onUnauthorizedCallback }, token);
 }
