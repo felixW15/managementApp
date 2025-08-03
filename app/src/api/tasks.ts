@@ -1,5 +1,6 @@
 // src/api/tasks.ts
 import { apiFetch } from "./client";
+import { getGlobalOnUnauthorized } from "./authHandler";
 
 export type Task = {
   id: number;
@@ -9,15 +10,10 @@ export type Task = {
   user_id: number;
 };
 
-let onUnauthorizedCallback: () => void = () => {};
-
-export function setOnUnauthorized(callback: () => void) {
-  onUnauthorizedCallback = callback;
-}
 
 export async function validateToken(token: string): Promise<boolean> {
   try {
-    await apiFetch("/me", { onUnauthorized: onUnauthorizedCallback }, token);
+    await apiFetch("/me", { onUnauthorized: getGlobalOnUnauthorized() }, token);
     return true;
   } catch (err) {
     return false;
@@ -25,7 +21,7 @@ export async function validateToken(token: string): Promise<boolean> {
 }
 
 export async function getTasks(token: string): Promise<Task[]> {
-  return apiFetch<Task[]>("/tasks/", { onUnauthorized: onUnauthorizedCallback }, token);
+  return apiFetch<Task[]>("/tasks/", { onUnauthorized: getGlobalOnUnauthorized() }, token);
 }
 
 export async function addTask(title: string, token: string): Promise<Task> {
@@ -34,14 +30,14 @@ export async function addTask(title: string, token: string): Promise<Task> {
     {
       method: "POST",
       body: JSON.stringify({ title }),
-      onUnauthorized: onUnauthorizedCallback,
+      onUnauthorized: getGlobalOnUnauthorized(),
     },
     token
   );
 }
 
 export async function deleteTask(id: number, token: string): Promise<void> {
-  await apiFetch(`/tasks/${id}`, { method: "DELETE", onUnauthorized: onUnauthorizedCallback }, token);
+  await apiFetch(`/tasks/${id}`, { method: "DELETE", onUnauthorized: getGlobalOnUnauthorized() }, token);
 }
 
 export async function updateTask(
@@ -54,7 +50,7 @@ export async function updateTask(
     {
       method: "PUT",
       body: JSON.stringify(data),
-      onUnauthorized: onUnauthorizedCallback,
+      onUnauthorized: getGlobalOnUnauthorized(),
     },
     token
   );

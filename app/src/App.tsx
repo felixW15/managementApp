@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/Auth";
 import { Tasks } from "./components/TaskList";
-import { setOnUnauthorized, validateToken } from "./api/tasks";
+import { validateToken } from "./api/tasks";
+import { setGlobalOnUnauthorized } from "./api/authHandler";
 import { SidebarLayout } from "./components/SidebarLayout";
 import { MediaComponent } from "./components/MediaManager";
 
@@ -39,7 +40,7 @@ function App() {
 
   useEffect(() => {
     if (token) {
-      setOnUnauthorized(() => {
+      setGlobalOnUnauthorized(() => {
         console.warn("Token expired. Logging out.");
         handleLogout();
       });

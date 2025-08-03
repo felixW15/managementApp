@@ -1,5 +1,6 @@
 // src/api/media.ts
 import { apiFetch } from "./client";
+import { getGlobalOnUnauthorized } from "./authHandler";
 
 export type Media = {
   id: number;
@@ -13,14 +14,9 @@ export type Media = {
 
 export type MediaBase = Omit<Media, "id" | "last_edited" | "user_id">;
 
-let onUnauthorizedCallback: () => void = () => {};
-
-export function setOnUnauthorized(callback: () => void) {
-  onUnauthorizedCallback = callback;
-}
 
 export async function getMedia(token: string): Promise<Media[]> {
-  return apiFetch<Media[]>("/media/", { onUnauthorized: onUnauthorizedCallback }, token);
+  return apiFetch<Media[]>("/media/", { onUnauthorized: getGlobalOnUnauthorized() }, token);
 }
 
 export async function addMedia(media: MediaBase, token: string): Promise<Media> {
@@ -29,7 +25,7 @@ export async function addMedia(media: MediaBase, token: string): Promise<Media> 
     {
       method: "POST",
       body: JSON.stringify(media),
-      onUnauthorized: onUnauthorizedCallback,
+      onUnauthorized: getGlobalOnUnauthorized(),
     },
     token
   );
@@ -38,7 +34,7 @@ export async function addMedia(media: MediaBase, token: string): Promise<Media> 
 export async function deleteMedia(id: number, token: string): Promise<void> {
   await apiFetch(`/media/${id}`, {
     method: "DELETE",
-    onUnauthorized: onUnauthorizedCallback,
+    onUnauthorized: getGlobalOnUnauthorized(),
   }, token);
 }
 
@@ -52,7 +48,7 @@ export async function updateMedia(
     {
       method: "PUT",
       body: JSON.stringify(data),
-      onUnauthorized: onUnauthorizedCallback,
+      onUnauthorized: getGlobalOnUnauthorized(),
     },
     token
   );
