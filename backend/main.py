@@ -42,7 +42,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 # SQLite engine (can switch to Postgres later)
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+psycopg2://postgres:postpw99@localhost:5432/managementappdb"
+    "postgresql://postgres:postpw99@localhost:5432/managementappdb"
 )
 
 engine = create_engine(DATABASE_URL, echo=True)
