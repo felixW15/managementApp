@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import SQLModel, Field, create_engine, Session
+from sqlmodel import SQLModel, create_engine, Session
 from typing import Optional
 from fastapi import HTTPException
 
@@ -40,9 +40,12 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         return user
 
 # SQLite engine (can switch to Postgres later)
-sqlite_file_name = os.getenv("DATABASE_URL", "database.db")
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-engine = create_engine(sqlite_url, echo=True)
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg2://postgres:postpw99@localhost:5432/managementappdb"
+)
+
+engine = create_engine(DATABASE_URL, echo=True)
 
 def get_session():
     with Session(engine) as session:

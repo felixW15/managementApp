@@ -1,6 +1,4 @@
-const API_URL = "https://managementapp-hwaq.onrender.com";
-
-// src/api/client.ts
+const API_URL = import.meta.env.VITE_API_URL;
 
 type FetchOptions = RequestInit & {
   onUnauthorized?: () => void;

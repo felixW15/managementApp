@@ -1,4 +1,4 @@
-const API_URL = "https://managementapp-hwaq.onrender.com"; // adjust if needed
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function register(username: string, password: string) {
   const res = await fetch(`${API_URL}/register?username=${username}&password=${password}`, {
