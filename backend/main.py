@@ -41,8 +41,11 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:postpw99@localhost:5432/managementappdb"
+    "TEST_DATABASE_URL",
+    os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg2://postgres:postpw99@localhost:5432/managementappdb"
+    )
 )
 
 engine = create_engine(DATABASE_URL, echo=True)
