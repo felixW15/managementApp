@@ -1,21 +1,27 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-from main import app, init_db
+from main import app, init_db, engine
 from sqlmodel import SQLModel
-from datetime import datetime
-from sqlmodel import SQLModel
-from main import engine
-
 
 client = TestClient(app)
+
+
 def setup_module(module):
-    """Setup test database."""
-    if os.path.exists("test.db"):
-        os.remove("test.db")
-    init_db()  # This will create tables
+    """Setup test database (PostgreSQL or fallback SQLite)."""
+    test_db_url = os.getenv(
+        "TEST_DATABASE_URL",
+        "postgresql+psycopg2://postgres:postgres@localhost:5432/managementappdb_test"
+    )
+    os.environ["DATABASE_URL"] = test_db_url
+
+    # Drop and recreate tables fresh for each test run
+    SQLModel.metadata.drop_all(engine)
+    SQLModel.metadata.create_all(engine)
+
 
 def register_and_login():
+    """Helper to register and login a test user."""
     client.post("/register", params={"username": "mediauser", "password": "testpass"})
     response = client.post("/login", params={"username": "mediauser", "password": "testpass"})
     return response.json()["access_token"]
@@ -81,8 +87,7 @@ def test_delete_media():
     assert del_resp.status_code == 200
     assert del_resp.json()["ok"] is True
 
+
 def teardown_module(module):
-    from main import engine  # import here to avoid circular issues
-    engine.dispose()         # this closes all pooled connections
-    if os.path.exists("test.db"):
-        os.remove("test.db")
+    """Tear down test database (dispose connections)."""
+    engine.dispose()

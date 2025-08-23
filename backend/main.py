@@ -39,7 +39,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-# SQLite engine (can switch to Postgres later)
+
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://postgres:postpw99@localhost:5432/managementappdb"
