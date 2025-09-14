@@ -2,12 +2,19 @@
 import { apiFetch } from "./client";
 import { getGlobalOnUnauthorized } from "./authHandler";
 
+export type Tag = {
+  id: number;
+  name: string;
+};
+
 export type Media = {
   id: number;
   name: string;
   category: "book" | "manga" | "anime" | "visual novel";
   status: "in progress" | "completed" | "dropped";
   progress: number;
+  rating: number; // stored as integer (0–20)
+  tags: Tag[];
   last_edited: string;
   user_id: number;
 };
@@ -40,7 +47,7 @@ export async function deleteMedia(id: number, token: string): Promise<void> {
 
 export async function updateMedia(
   id: number,
-  data: Partial<Omit<MediaBase, "user_id">>,
+  data: MediaBase,
   token: string
 ): Promise<Media> {
   return apiFetch<Media>(

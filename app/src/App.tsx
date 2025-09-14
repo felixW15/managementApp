@@ -4,7 +4,7 @@ import { Tasks } from "./components/TaskList";
 import { validateToken } from "./api/tasks";
 import { setGlobalOnUnauthorized } from "./api/authHandler";
 import { SidebarLayout } from "./components/SidebarLayout";
-import { MediaComponent } from "./components/MediaManager";
+import { MediaManager } from "./components/media/MediaManager";
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
@@ -65,7 +65,7 @@ function App() {
             {
               label: "Media",
               key: "media",
-              component: <MediaComponent token={token} />,
+              component: <MediaManager token={token} />,
             },
           ]}
         />
