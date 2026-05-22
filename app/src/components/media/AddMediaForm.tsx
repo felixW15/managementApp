@@ -71,6 +71,7 @@ export function AddMediaForm({ onSubmit }: AddMediaFormProps) {
       category: "book",
       status: "in progress",
       progress: 0,
+      total_episodes: null,
       rating: 0,
       tags: [],
     });

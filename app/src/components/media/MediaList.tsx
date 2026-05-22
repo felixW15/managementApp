@@ -54,6 +54,7 @@ export function MediaList({
         category: existing.category,
         status: existing.status,
         progress: existing.progress,
+        total_episodes: existing.total_episodes,
         rating: existing.rating,
         tags: existing.tags,
         [field]: value,

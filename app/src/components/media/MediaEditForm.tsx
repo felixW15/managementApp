@@ -29,8 +29,9 @@ export function MediaEditForm({
     category: media.category,
     status: media.status,
     progress: media.progress,
+    total_episodes: media.total_episodes,
     rating: media.rating,
-    tags: [...media.tags], // Create a copy of tags array
+    tags: [...media.tags],
   });
 
   const [newTagName, setNewTagName] = useState("");
@@ -140,6 +141,7 @@ export function MediaEditForm({
             <option value="book">Book</option>
             <option value="manga">Manga</option>
             <option value="anime">Anime</option>
+            <option value="movie">Movie</option>
             <option value="visual novel">Visual Novel</option>
           </select>
         </div>
@@ -161,6 +163,7 @@ export function MediaEditForm({
             disabled={isLoading}
           >
             <option value="in progress">In Progress</option>
+            <option value="plan to watch">Plan to Watch</option>
             <option value="completed">Completed</option>
             <option value="dropped">Dropped</option>
           </select>
