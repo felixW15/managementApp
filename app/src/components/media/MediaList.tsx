@@ -157,6 +157,7 @@ export function MediaList({
                     className="border border-gray-300 dark:border-gray-700 rounded px-2 py-1 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   >
                     <option value="in progress">In Progress</option>
+                    <option value="plan to watch">Plan to Watch</option>
                     <option value="completed">Completed</option>
                     <option value="dropped">Dropped</option>
                   </select>
