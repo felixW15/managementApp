@@ -33,6 +33,7 @@ export function MediaFilters({
           <option value="all">All</option>
           <option value="book">Book</option>
           <option value="manga">Manga</option>
+          <option value="webtoon">Webtoon</option>
           <option value="anime">Anime</option>
           <option value="movie">Movie</option>
           <option value="visual novel">Visual Novel</option>

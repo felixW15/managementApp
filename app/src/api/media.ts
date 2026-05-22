@@ -10,7 +10,7 @@ export type Tag = {
 export type Media = {
   id: number;
   name: string;
-  category: "book" | "manga" | "anime" | "visual novel" | "movie";
+  category: "book" | "manga" | "anime" | "visual novel" | "movie" | "webtoon";
   status: "in progress" | "completed" | "dropped" | "plan to watch";
   progress: number;
   total_episodes: number | null;

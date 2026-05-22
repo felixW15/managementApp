@@ -257,10 +257,13 @@ CATEGORY_MAP = {
     "Animeserie": "anime",
     "Movie": "movie",
     "Mangaserie": "manga",
-    "Webtoon": "manga",
     "Manga": "manga",
     "Manhwa": "manga",
     "Manhua": "manga",
+}
+
+SUBTYPE_OVERRIDES = {
+    "Webtoon": "webtoon",
 }
 
 @app.post("/media/import")
@@ -282,7 +285,7 @@ async def import_media_csv(
                 last_edited = datetime.now()
             media = Media(
                 name=name,
-                category=CATEGORY_MAP.get(row.get("category", ""), row.get("category", "").lower()),
+                category=SUBTYPE_OVERRIDES.get(row.get("subtype", ""), CATEGORY_MAP.get(row.get("category", ""), row.get("category", "").lower())),
                 status=STATUS_MAP.get(row.get("status", ""), row.get("status", "")),
                 progress=int(row.get("progress_current") or 0),
                 total_episodes=int(row["progress_total"]) if row.get("progress_total") else None,

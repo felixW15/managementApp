@@ -28,6 +28,7 @@ export function MediaManager({ token }: MediaManagerProps) {
     manga: "bg-pink-100 text-pink-800 border-pink-300",
     anime: "bg-blue-100 text-blue-800 border-blue-300",
     movie: "bg-red-100 text-red-800 border-red-300",
+    webtoon: "bg-teal-100 text-teal-800 border-teal-300",
     "visual novel": "bg-purple-100 text-purple-800 border-purple-300",
   };
 
