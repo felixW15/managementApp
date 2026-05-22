@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Media, MediaBase } from "@api/media.ts";
-import { getMedia, addMedia } from "@api/media.ts";
+import { getMedia, addMedia, importMediaCsv } from "@api/media.ts";
 import { AddMediaForm } from "./AddMediaForm";
 import { MediaFilters } from "./MediaFilters";
 import { MediaList } from "./MediaList";
@@ -27,7 +27,24 @@ export function MediaManager({ token }: MediaManagerProps) {
     book: "bg-yellow-100 text-yellow-800 border-yellow-300",
     manga: "bg-pink-100 text-pink-800 border-pink-300",
     anime: "bg-blue-100 text-blue-800 border-blue-300",
+    movie: "bg-red-100 text-red-800 border-red-300",
     "visual novel": "bg-purple-100 text-purple-800 border-purple-300",
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const result = await importMediaCsv(file, token);
+      alert(`Imported ${result.imported} entries.`);
+      await fetchMedia();
+    } catch (err) {
+      console.error("Import failed:", err);
+      alert("Import failed. Check the console for details.");
+    }
+    e.target.value = "";
   };
 
   useEffect(() => {
@@ -88,14 +105,27 @@ export function MediaManager({ token }: MediaManagerProps) {
         📚 Media Manager
       </h2>
 
-      {/* Add Media Toggle */}
-      <div className="mb-4">
+      {/* Add Media / Import controls */}
+      <div className="flex gap-2 mb-4">
         <button
           onClick={() => setShowAddForm((prev) => !prev)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
         >
           {showAddForm ? "Hide Add Form" : "➕ Add New Media"}
         </button>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+        >
+          Import CSV
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          className="hidden"
+          onChange={handleImport}
+        />
       </div>
 
       {/* Add Media Form */}

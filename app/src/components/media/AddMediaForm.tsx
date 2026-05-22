@@ -13,6 +13,7 @@ export function AddMediaForm({ onSubmit }: AddMediaFormProps) {
     category: "book",
     status: "in progress",
     progress: 0,
+    total_episodes: null,
     rating: 0,
     tags: [],
   });
@@ -96,6 +97,7 @@ export function AddMediaForm({ onSubmit }: AddMediaFormProps) {
         <option value="book">Book</option>
         <option value="manga">Manga</option>
         <option value="anime">Anime</option>
+        <option value="movie">Movie</option>
         <option value="visual novel">Visual Novel</option>
       </select>
 
@@ -106,6 +108,7 @@ export function AddMediaForm({ onSubmit }: AddMediaFormProps) {
         className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
       >
         <option value="in progress">In Progress</option>
+        <option value="plan to watch">Plan to Watch</option>
         <option value="completed">Completed</option>
         <option value="dropped">Dropped</option>
       </select>

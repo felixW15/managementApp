@@ -4,15 +4,16 @@ from sqlmodel import SQLModel, create_engine, Session
 from typing import Optional
 from fastapi import HTTPException
 
-
 from auth import hash_password, verify_password, create_access_token, decode_access_token
-from models import User, Task ,TaskBase ,Media, MediaBase, Tag, MediaRead # <-- assuming Task is moved here too
+from models import User, Task, TaskBase, Media, MediaBase, Tag, MediaRead
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime
-from fastapi import Depends, Request
+from fastapi import Depends, Request, UploadFile, File
 from sqlmodel import select
 from sqlalchemy.orm import selectinload, joinedload
 import os
+import csv
+import io
 
 
 
@@ -220,6 +221,7 @@ def update_media(
     media.category = updated.category
     media.status = updated.status
     media.progress = updated.progress
+    media.total_episodes = updated.total_episodes
     media.rating = updated.rating
 
     # Update tags (handle objects instead of strings)
@@ -240,3 +242,48 @@ def update_media(
     session.commit()
     session.refresh(media, attribute_names=["tags"])
     return media
+
+STATUS_MAP = {
+    "Geschaut": "completed",
+    "Am Schauen": "in progress",
+    "Abgebrochen": "dropped",
+    "Wird noch geschaut": "plan to watch",
+}
+
+CATEGORY_MAP = {
+    "Animeserie": "anime",
+    "Movie": "movie",
+}
+
+@app.post("/media/import")
+async def import_media_csv(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    content = await file.read()
+    reader = csv.DictReader(io.StringIO(content.decode("utf-8")))
+    created = 0
+    with Session(engine) as session:
+        for row in reader:
+            name = row.get("name", "").strip()
+            if not name:
+                continue
+            try:
+                last_edited = datetime.fromisoformat(row.get("date", "").strip())
+            except ValueError:
+                last_edited = datetime.now()
+            media = Media(
+                name=name,
+                category=CATEGORY_MAP.get(row.get("category", ""), row.get("category", "").lower()),
+                status=STATUS_MAP.get(row.get("status", ""), row.get("status", "")),
+                progress=int(row.get("progress_current") or 0),
+                total_episodes=int(row["progress_total"]) if row.get("progress_total") else None,
+                rating=int(row.get("rating") or 0) * 2,
+                last_edited=last_edited,
+                user_id=current_user.id,
+                tags=[],
+            )
+            session.add(media)
+            created += 1
+        session.commit()
+    return {"imported": created}

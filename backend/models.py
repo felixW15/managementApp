@@ -28,6 +28,7 @@ class MediaBase(SQLModel):
     category: str
     status: str
     progress: int
+    total_episodes: Optional[int] = None
     rating: int = 0
     tags: List[TagCreate] = []
 
@@ -44,9 +45,10 @@ class Tag(SQLModel, table=True):
 class Media(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    category: str  # e.g. book, manga, anime, series
-    status: str  # e.g. in progress, completed, dropped
+    category: str
+    status: str
     progress: int = 0
+    total_episodes: Optional[int] = None
     rating: int = Field(default=0, ge=0, le=20)
     last_edited: datetime
     user_id: int = Field(foreign_key="user.id")
@@ -62,7 +64,8 @@ class MediaRead(SQLModel):
     category: str
     status: str
     progress: int
+    total_episodes: Optional[int] = None
     rating: int
     last_edited: datetime
     user_id: int
-    tags: List[TagRead] = []   # include tags here
+    tags: List[TagRead] = []

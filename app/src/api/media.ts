@@ -10,9 +10,10 @@ export type Tag = {
 export type Media = {
   id: number;
   name: string;
-  category: "book" | "manga" | "anime" | "visual novel";
-  status: "in progress" | "completed" | "dropped";
+  category: "book" | "manga" | "anime" | "visual novel" | "movie";
+  status: "in progress" | "completed" | "dropped" | "plan to watch";
   progress: number;
+  total_episodes: number | null;
   rating: number; // stored as integer (0–20)
   tags: Tag[];
   last_edited: string;
@@ -55,6 +56,20 @@ export async function updateMedia(
     {
       method: "PUT",
       body: JSON.stringify(data),
+      onUnauthorized: getGlobalOnUnauthorized(),
+    },
+    token
+  );
+}
+
+export async function importMediaCsv(file: File, token: string): Promise<{ imported: number }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiFetch<{ imported: number }>(
+    "/media/import",
+    {
+      method: "POST",
+      body: formData,
       onUnauthorized: getGlobalOnUnauthorized(),
     },
     token
