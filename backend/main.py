@@ -248,11 +248,19 @@ STATUS_MAP = {
     "Am Schauen": "in progress",
     "Abgebrochen": "dropped",
     "Wird noch geschaut": "plan to watch",
+    "Gelesen": "completed",
+    "Am Lesen": "in progress",
+    "Wird noch gelesen": "plan to watch",
 }
 
 CATEGORY_MAP = {
     "Animeserie": "anime",
     "Movie": "movie",
+    "Mangaserie": "manga",
+    "Webtoon": "manga",
+    "Manga": "manga",
+    "Manhwa": "manga",
+    "Manhua": "manga",
 }
 
 @app.post("/media/import")
