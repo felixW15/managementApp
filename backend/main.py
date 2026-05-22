@@ -1,14 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel, create_engine, Session
-from typing import Optional
 from fastapi import HTTPException
 
 from auth import hash_password, verify_password, create_access_token, decode_access_token
 from models import User, Task, TaskBase, Media, MediaBase, Tag, MediaRead
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime
-from fastapi import Depends, Request, UploadFile, File
+from fastapi import Depends, UploadFile, File
 from sqlmodel import select
 from sqlalchemy.orm import selectinload, joinedload
 import os
@@ -255,6 +254,8 @@ STATUS_MAP = {
 
 CATEGORY_MAP = {
     "Animeserie": "anime",
+    "OVA": "anime",
+    "ONA": "anime",
     "Movie": "movie",
     "Mangaserie": "manga",
     "Manga": "manga",
@@ -285,8 +286,8 @@ async def import_media_csv(
                 last_edited = datetime.now()
             media = Media(
                 name=name,
-                category=SUBTYPE_OVERRIDES.get(row.get("subtype", ""), CATEGORY_MAP.get(row.get("category", ""), row.get("category", "").lower())),
-                status=STATUS_MAP.get(row.get("status", ""), row.get("status", "")),
+                category=SUBTYPE_OVERRIDES.get(row.get("subtype", "").strip(), CATEGORY_MAP.get(row.get("category", "").strip(), row.get("category", "").strip().lower())),
+                status=STATUS_MAP.get(row.get("status", "").strip(), row.get("status", "").strip()),
                 progress=int(row.get("progress_current") or 0),
                 total_episodes=int(row["progress_total"]) if row.get("progress_total") else None,
                 rating=int(row.get("rating") or 0) * 2,
